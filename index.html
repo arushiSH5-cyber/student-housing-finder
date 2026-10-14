@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Student Housing Finder</title>
+<style>
+:root{
+  --bg:#f3f4f6;--panel:#fff;--ink:#14181f;--ink2:#58606b;--ink3:#8b929c;--line:#e5e7eb;--soft:#f1f3f5;
+  --accent:#2563eb;--accent-soft:#e6efff;--accent-ink:#1d4ed8;--warn:#9a5b00;--warn-soft:#fff3dc;--ok:#1f7a4d;--ok-soft:#e5f5ec;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font:12.5px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;overflow:hidden}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+.app{height:100vh;max-height:900px;max-width:1440px;margin:0 auto;padding:14px 16px 10px;display:grid;
+  grid-template-columns:248px minmax(0,1fr) 330px;grid-template-rows:46px minmax(0,1fr) 30px;gap:12px}
+/* header */
+header{grid-column:1/-1;display:flex;align-items:center;gap:14px}
+.logo{width:34px;height:34px;border-radius:9px;background:var(--accent);display:grid;place-items:center;color:#fff;font-weight:800;font-size:15px;flex:none}
+header h1{font-size:19px;font-weight:700;letter-spacing:-.3px}
+header .upd{color:var(--ink2);font-size:12px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+header .upd b{color:var(--ok);font-weight:600}
+.acts{margin-left:auto;display:flex;gap:6px;align-items:center;flex:none}
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:7px 12px;font-weight:600;color:var(--ink2)}
+.btn:hover{border-color:#c9cdd3;color:var(--ink)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.menu{position:relative}
+.menu summary{list-style:none}.menu summary::-webkit-details-marker{display:none}
+.menu .pop{position:absolute;right:0;top:38px;z-index:5;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.12);padding:6px;width:220px}
+.menu .pop button{display:block;width:100%;text-align:left;padding:8px 10px;border-radius:8px}
+.menu .pop button:hover{background:var(--soft)}
+.menu .pop small{display:block;color:var(--ink3);font-size:11px}
+/* panels */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px}
+aside.filters{padding:14px 16px;display:flex;flex-direction:column;gap:9px;overflow:hidden}
+.lbl{font-size:10.5px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px}
+.seg{display:flex;background:var(--soft);border-radius:10px;padding:3px}
+.seg button{flex:1;padding:7px 0;border-radius:8px;font-weight:600;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.seg button.on{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+select.area{width:100%;border:1px solid var(--line);border-radius:10px;padding:7px 8px;background:var(--panel);font-weight:600}
+.budget{display:flex;align-items:baseline;justify-content:space-between}
+.budget b{font-size:22px;font-weight:750;letter-spacing:-.5px;color:var(--accent)}
+.budget small{color:var(--ink2)}
+input[type=range]{width:100%;accent-color:var(--accent);margin-top:4px}
+.scale{display:flex;justify-content:space-between;color:var(--ink3);font-size:10.5px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-weight:600;color:var(--ink2);background:var(--panel)}
+.chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.bench{background:var(--soft);border-radius:10px;padding:10px 12px}
+.bench .r{display:flex;justify-content:space-between;align-items:center;padding:2px 0}
+.bench .r span{font-size:11.5px;color:var(--ink2)}
+.bench input{width:74px;border:1px solid var(--line);border-radius:7px;padding:3px 6px;text-align:right;background:var(--panel);font-weight:700}
+.bench .fine{font-size:10.5px;color:var(--ink3);margin-top:5px}
+.fresh-box{margin-top:auto}
+.fresh-box .r{display:flex;align-items:center;gap:7px;padding:2px 0;color:var(--ink2)}
+.fresh-box .r b{margin-left:auto;color:var(--ink)}
+/* listings */
+main{display:flex;flex-direction:column;min-height:0;gap:10px}
+.bar{display:flex;align-items:center;gap:10px}
+.bar h2{font-size:16px;font-weight:700;letter-spacing:-.2px;white-space:nowrap}
+.bar .count{color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sort{margin-left:auto;display:flex;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:3px;flex:none}
+.sort button{padding:4px 10px;border-radius:7px;font-weight:600;color:var(--ink2)}
+.sort button.on{background:var(--ink);color:#fff}
+.pager{display:flex;gap:4px;align-items:center;color:var(--ink2);flex:none}
+.pager button{width:26px;height:26px;border-radius:8px;border:1px solid var(--line);background:var(--panel);font-weight:700}
+.pager button:disabled{opacity:.35;cursor:default}
+.grid{flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(4,minmax(0,1fr));gap:10px}
+.l{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;text-align:left;min-height:0;overflow:hidden;transition:border-color .12s,box-shadow .12s}
+.l:hover{border-color:#c9cdd3}
+.l.sel{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.l .top{display:flex;justify-content:space-between;gap:6px;align-items:flex-start}
+.l .nm{font-weight:700;font-size:13px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.l .ad{color:var(--ink3);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.camp{font-size:9.5px;font-weight:800;letter-spacing:.4px;color:var(--ink3);border:1px solid var(--line);border-radius:5px;padding:1px 5px;flex:none;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pr{display:flex;align-items:baseline;gap:5px;white-space:nowrap}
+.pr b{font-size:19px;font-weight:750;letter-spacing:-.4px;color:var(--ink3)}
+.pr b.fits{color:var(--accent)}
+.pr span{color:var(--ink2);font-size:11px;overflow:hidden;text-overflow:ellipsis}
+.pr b.call{font-size:15px;color:var(--ink2)}
+.opt{color:var(--ink2);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tags{display:flex;gap:4px;flex-wrap:nowrap;overflow:hidden}
+.tag{font-size:10.5px;font-weight:600;background:var(--soft);color:var(--ink2);border-radius:6px;padding:2px 6px;white-space:nowrap}
+.foot{margin-top:auto;display:flex;justify-content:space-between;align-items:center;gap:6px;min-width:0}
+.st{font-size:10.5px;font-weight:700;border-radius:6px;padding:2px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.st.ok{background:var(--ok-soft);color:var(--ok)}
+.st.warn{background:var(--warn-soft);color:var(--warn)}
+.src{font-size:10px;color:var(--ink3);white-space:nowrap;display:flex;align-items:center;gap:4px;flex:0 1 auto;min-width:0;max-width:44%;overflow:hidden}
+.src em{font-style:normal;overflow:hidden;text-overflow:ellipsis}
+.st{flex:0 1 auto}
+.empty{grid-column:1/-1;grid-row:1/-1;display:grid;place-items:center;color:var(--ink2);text-align:center;background:var(--panel);border:1px dashed #cfd3d9;border-radius:14px}
+.empty b{font-size:15px;color:var(--ink);display:block;margin-bottom:4px}
+.empty .btn{margin:12px 4px 0}
+/* detail */
+aside.detail{padding:16px;display:flex;flex-direction:column;gap:12px;overflow:hidden}
+.dh .nm{font-size:16px;font-weight:750;letter-spacing:-.2px}
+.dh .ad{color:var(--ink2);font-size:11.5px}
+.dh .links{display:flex;gap:12px;margin-top:3px}
+.dh a,.dh .lk{color:var(--accent);font-weight:600;font-size:11.5px;text-decoration:none}
+.dh .lk.del{color:var(--ink3)}
+.cost{background:var(--soft);border-radius:12px;padding:12px}
+.row{display:flex;justify-content:space-between;padding:3px 0;color:var(--ink2)}
+.row b{color:var(--ink);font-weight:600}
+.row.tot{border-top:1px solid var(--line);margin-top:4px;padding-top:7px;color:var(--ink)}
+.row.tot b{font-size:18px;font-weight:750;color:var(--accent)}
+.row.up b{font-size:14px}
+.cost .fine{font-size:10.5px;color:var(--ink3);margin-top:4px}
+.ask ul,.scam ul{list-style:none}
+.ask li,.scam li{padding:4px 0 4px 20px;position:relative;border-top:1px solid var(--line)}
+.ask li:first-child,.scam li:first-child{border-top:0}
+.ask li::before{content:"?";position:absolute;left:0;top:5px;width:14px;height:14px;border-radius:50%;background:var(--accent-soft);color:var(--accent-ink);font-size:9.5px;font-weight:800;text-align:center;line-height:14px}
+.scam li::before{content:"!";position:absolute;left:0;top:5px;width:14px;height:14px;border-radius:50%;background:var(--ink);color:#fff;font-size:9.5px;font-weight:800;text-align:center;line-height:14px}
+/* source strip */
+.fresh{grid-column:1/-1;display:flex;align-items:center;gap:6px;overflow:hidden;white-space:nowrap}
+.fresh .lbl{margin:0}
+.fresh .note{margin-left:auto;color:var(--ink3);font-size:11px}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:11px;color:var(--ink2)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--ok);flex:none;display:inline-block}
+.dot.mid{background:#d39b2a}
+.dot.off{background:#c5c9cf}
+/* add/edit form */
+.modal{position:fixed;inset:0;background:rgba(20,24,31,.45);display:none;place-items:center;z-index:10}
+.modal.on{display:grid}
+.form{width:680px;max-width:calc(100vw - 32px);background:var(--panel);border-radius:16px;padding:20px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px 14px}
+.form h3{grid-column:1/-1;font-size:17px}
+.form h3 small{display:block;font-size:12px;font-weight:400;color:var(--ink2)}
+.form label{display:flex;flex-direction:column;gap:3px;font-size:11px;font-weight:700;color:var(--ink2)}
+.form label.w2{grid-column:span 2}.form label.w3{grid-column:1/-1}
+.form input,.form select{border:1px solid var(--line);border-radius:8px;padding:7px 9px;font-weight:500;color:var(--ink);background:var(--panel)}
+.form .checks{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px 16px}
+.form .checks label{flex-direction:row;align-items:center;gap:5px;font-weight:600;color:var(--ink)}
+.form .end{grid-column:1/-1;display:flex;justify-content:flex-end;gap:8px;margin-top:4px}
+.toast{position:fixed;left:50%;bottom:52px;transform:translateX(-50%);background:var(--ink);color:#fff;border-radius:10px;padding:8px 14px;font-weight:600;display:none;z-index:20}
+@media (max-width:1100px){
+  body{overflow:auto}
+  .app{height:auto;max-height:none;grid-template-columns:1fr;grid-template-rows:auto}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none;grid-auto-rows:170px}
+  .fresh{flex-wrap:wrap;white-space:normal}
+  .acts .btn:not(.pri){padding:7px 9px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<header>
+  <div class="logo">H</div>
+  <div style="min-width:0">
+    <h1>Student Housing Finder</h1>
+    <div class="upd" id="upd"></div>
+  </div>
+  <div class="acts">
+    <button class="btn pri" id="addBtn">+ Add a place</button>
+    <button class="btn" id="impBtn">Import</button>
+    <button class="btn" id="expBtn">Export</button>
+    <details class="menu" id="menu"><summary class="btn">⋯</summary>
+      <div class="pop">
+        <button id="exCsv">Download CSV template<small>Fill it in a spreadsheet, then Import</small></button>
+        <button id="loadEx">Load example data<small>San Jose, CA (SJSU &amp; SCU), Oct 2026</small></button>
+        <button id="clearAll">Start empty<small>Remove every place from this browser</small></button>
+      </div>
+    </details>
+    <input type="file" id="file" accept=".json,.csv,application/json,text/csv" hidden>
+  </div>
+</header>
+
+<aside class="card filters">
+  <div>
+    <div class="lbl">My campus or area</div>
+    <div id="areaBox"></div>
+  </div>
+  <div>
+    <div class="lbl">Max rent per person / month</div>
+    <div class="budget"><b id="budv">$1,600</b><small id="fitn"></small></div>
+    <input id="bud" type="range" min="300" max="4000" step="50" value="1600" aria-label="Budget">
+    <div class="scale"><span>$300</span><span>$4,000</span></div>
+  </div>
+  <div>
+    <div class="lbl">Living setup</div>
+    <div class="chips" id="types">
+      <button class="chip" data-k="room">Room</button>
+      <button class="chip" data-k="share">Share a unit</button>
+      <button class="chip" data-k="alone">Live alone</button>
+      <button class="chip" data-k="campus">On campus</button>
+    </div>
+  </div>
+  <div>
+    <div class="lbl">I need</div>
+    <div class="chips" id="needs">
+      <button class="chip" data-k="furn">Furnished</button>
+      <button class="chip" data-k="wd">In-unit laundry</button>
+      <button class="chip" data-k="walk">≤10 min walk</button>
+      <button class="chip" data-k="pets">Pets OK</button>
+      <button class="chip" data-k="util">Utilities incl.</button>
+      <button class="chip" data-k="priced">Price listed</button>
+    </div>
+  </div>
+  <div class="bench">
+    <div class="lbl" style="margin-bottom:4px">My other monthly costs</div>
+    <div class="r"><span>Utilities + internet</span><input id="sUtil" type="number" min="0" step="10"></div>
+    <div class="r"><span>Food</span><input id="sFood" type="number" min="0" step="10"></div>
+    <div class="r"><span>Deposit (months)</span><input id="sDep" type="number" min="0" max="3" step="0.5"></div>
+    <div class="r"><span>Application fee</span><input id="sFee" type="number" min="0" step="5"></div>
+    <div class="fine">Use your school's food estimate and your state's deposit limit.</div>
+  </div>
+  <div class="bench fresh-box" id="freshBox"></div>
+</aside>
+
+<main>
+  <div class="bar">
+    <h2 id="title">Places</h2><span class="count" id="count"></span>
+    <div class="sort" id="sort"><button data-v="price" class="on">Cheapest</button><button data-v="walk">Closest</button><button data-v="new">Newest</button></div>
+    <div class="pager"><button id="prev" aria-label="Previous page">‹</button><span id="pg">1/1</span><button id="next" aria-label="Next page">›</button></div>
+  </div>
+  <div class="grid" id="grid"></div>
+</main>
+
+<aside class="card detail" id="detail"></aside>
+
+<div class="fresh" id="srcStrip"></div>
+
+</div>
+
+<div class="modal" id="modal">
+  <form class="form" id="form" autocomplete="off">
+    <h3 id="fTitle">Add a place<small>Copy what the listing says. Leave anything you don't know blank.</small></h3>
+    <label class="w2">Name *<input name="n" required placeholder="e.g. Maple Court Apartments"></label>
+    <label>Campus or area *<input name="c" required placeholder="e.g. UT Austin" list="areaList"></label>
+    <label class="w2">Address<input name="a" placeholder="Street, city, state"></label>
+    <label>Living setup<select name="k"><option value="room">Room</option><option value="share">Share a unit</option><option value="alone">Live alone</option><option value="campus">On campus</option></select></label>
+    <label>Rent per person / mo ($)<input name="lo" type="number" min="0" placeholder="blank = not listed"></label>
+    <label>Up to ($, optional)<input name="hi" type="number" min="0"></label>
+    <label>Price basis<input name="basis" placeholder="/bed, /room, /person if 2 share"></label>
+    <label class="w2">Unit details<input name="opt" placeholder="e.g. 2BR $2,400 total · 12-month lease"></label>
+    <label>Walk to campus (min)<input name="walk" type="number" min="0"></label>
+    <label class="w2">Status<input name="st" placeholder="e.g. Available now · Apply by Mar 1"></label>
+    <label>Extra tags<input name="tags" placeholder="Gym, Parking"></label>
+    <label>Source<input name="src" placeholder="Where you found it"></label>
+    <label>Date you checked<input name="checked" type="date"></label>
+    <label>Listing link<input name="url" type="url" placeholder="https://"></label>
+    <div class="checks">
+      <label><input type="checkbox" name="furn">Furnished</label>
+      <label><input type="checkbox" name="wd">In-unit laundry</label>
+      <label><input type="checkbox" name="pets">Pets OK</label>
+      <label><input type="checkbox" name="util">Utilities included</label>
+      <label><input type="checkbox" name="undated">Page shows no date</label>
+      <label><input type="checkbox" name="stale">Old listing, may be gone</label>
+      <label><input type="checkbox" name="warn">Needs checking (price looks off)</label>
+    </div>
+    <div class="end"><button type="button" class="btn" id="fCancel">Cancel</button><button type="submit" class="btn pri">Save place</button></div>
+  </form>
+</div>
+<datalist id="areaList"></datalist>
+<div class="toast" id="toast"></div>
+
+<script>
+/* Example data: SJSU & SCU (San Jose, CA), prices checked Oct 13, 2026.
+   lo/hi = rent per person per month (USD). Shared units are divided by bedrooms and marked "if shared". */
+var EXAMPLE={settings:{util:100,food:805,dep:1,fee:65},listings:[
+ {n:'Sparta505 Student Housing',a:'505–525 E Santa Clara St, San Jose, CA',c:'SJSU',k:'room',lo:995,hi:1970,basis:'/bed',opt:'2BR or 4BR suites · individual leases · free Wi-Fi',walk:10,furn:1,wd:1,st:'Sold out · leasing Feb 2027',warn:1,src:'ApartmentFinder',checked:'2026-10-13',url:'https://www.apartmentfinder.com/California/San-Jose-Apartments/Sparta505-Student-Housing-Apartments-wr437pl',tags:['Gated','Gym']},
+ {n:'The Grad San Jose',a:'88 E San Carlos St, San Jose, CA',c:'SJSU',k:'room',lo:1223,hi:2288,basis:'',opt:'2–4 bedrooms · ask if price is per bed',walk:9,st:'Available now',src:'SJSU official off-campus site',checked:'2026-10-13',undated:1,url:'https://offcampushousing.sjsu.edu/listing',tags:['School-reviewed']},
+ {n:'Polaris Apartments',a:'230 E San Salvador St, San Jose, CA',c:'SJSU',k:'share',lo:1650,hi:4000,basis:'',opt:'Studio to 4BR · ask if price is per bed or unit',walk:5,st:'Available now',src:'SJSU official off-campus site',checked:'2026-10-13',undated:1,url:'https://offcampushousing.sjsu.edu/listing',tags:['School-reviewed']},
+ {n:'27 North Student Housing',a:'27 N 6th St, San Jose, CA',c:'SJSU',k:'room',lo:null,basis:'',opt:'2–4BR · individual leases · roommate matching',walk:8,furn:1,wd:1,st:'Available now',src:'Apartments.com',checked:'2026-10-13',url:'https://offcampushousing.emerson.edu/housing/property/27-north-student-housing-apartments/6tl1lcr',tags:['Pool']},
+ {n:'Room in 5BR house, St. James',a:'269 E St. James St, San Jose, CA',c:'SJSU',k:'room',lo:950,basis:'/room if 5 share',opt:'Whole 5BR/2BA house $4,750',walk:null,st:'Listed in Oct 2026 guide',src:'Off-Campus Universe guide',checked:'2026-10-02',url:'https://www.offcampus-universe.com/post/apartments-near-san-jose-state-university-sjsu-housing-guide',tags:['Group of 5']},
+ {n:'Room, utilities included',a:'8BR/4BA shared house, San Jose, CA',c:'SJSU',k:'room',lo:1500,basis:'/room',opt:'Room in shared house · ask what "utilities" covers',walk:15,util:1,st:'Listed in Oct 2026 guide',src:'Off-Campus Universe guide',checked:'2026-10-02',url:'https://www.offcampus-universe.com/post/apartments-near-san-jose-state-university-sjsu-housing-guide',tags:[]},
+ {n:'Room with private bath',a:'Near SJSU, San Jose, CA',c:'SJSU',k:'room',lo:1598,basis:'/room',opt:'Private bedroom + private bathroom',walk:5,st:'Listed in Oct 2026 guide',src:'Off-Campus Universe guide',checked:'2026-10-02',url:'https://www.offcampus-universe.com/post/apartments-near-san-jose-state-university-sjsu-housing-guide',tags:['Private bath']},
+ {n:'Veridian Apartments',a:'439–441 S 5th St, San Jose, CA',c:'SJSU',k:'share',lo:1248,basis:'/person if 2 share',opt:'2BR $2,495+ · studio $2,535',walk:null,st:'Verify: 2BR < studio price',warn:1,src:'Apartments.com',checked:'2026-10-13',url:'https://www.apartments.com/downtown-san-jose-san-jose-ca/student-housing/',tags:['Roommates']},
+ {n:'The Franciscan',a:'278 S 10th St, San Jose, CA',c:'SJSU',k:'alone',lo:1200,basis:'/studio',opt:'Studio $1,200+ · whole unit',walk:null,st:'Verify: far below market',warn:1,src:'Apartments.com',checked:'2026-10-13',url:'https://www.apartments.com/downtown-san-jose-san-jose-ca/student-housing/',tags:[]},
+ {n:'Market Gateway Apartments',a:'535 S Market St, San Jose, CA',c:'SJSU',k:'share',lo:1550,basis:'/person if 2 share',opt:'1BR $2,600+ · 2BR $3,100+',walk:null,st:'Listed',src:'Apartments.com',checked:'2026-10-13',url:'https://www.apartments.com/downtown-san-jose-san-jose-ca/student-housing/',tags:['Roommates']},
+ {n:'The Colonnade Apartments',a:'201 S 4th St, San Jose, CA',c:'SJSU',k:'share',lo:1654,basis:'/person if 2 share',opt:'Studio $2,117+ · 1BR $2,361+ · 2BR $3,308+',walk:null,st:'Listed',src:'Apartments.com',checked:'2026-10-13',url:'https://www.apartments.com/downtown-san-jose-san-jose-ca/student-housing/',tags:['Studio option']},
+ {n:'Foundry Commons',a:'868 S 5th St, San Jose, CA',c:'SJSU',k:'share',lo:1818,basis:'/person if 2 share',opt:'1BR $3,109 · 2BR $3,635',walk:null,wd:1,pets:1,st:'Listed',src:'Apartments.com',checked:'2026-10-13',url:'https://www.apartments.com/downtown-san-jose-san-jose-ca/student-housing/',tags:['Pool','Gated']},
+ {n:'232 N 8th St (1BR)',a:'232 N 8th St, San Jose, CA',c:'SJSU',k:'alone',lo:1900,basis:'/1BR',opt:'1-bedroom · whole unit',walk:null,st:'Listed',src:'Apartments.com',checked:'2026-10-13',url:'https://www.apartments.com/downtown-san-jose-san-jose-ca/student-housing/',tags:[]},
+ {n:'Westwood Properties',a:'55–75 S 6th St, San Jose, CA',c:'SJSU',k:'alone',lo:2395,basis:'/1BR',opt:'1BR $2,395+ · heat listed · shared laundry',walk:null,pets:1,st:'Listed',src:'Apartments.com',checked:'2026-10-13',url:'https://www.apartments.com/downtown-san-jose-san-jose-ca/student-housing/',tags:['Gated','Shared laundry']},
+ {n:'SJSU Classics (Affordable)',a:'On campus · Washburn / Joe West Hall',c:'SJSU',k:'campus',lo:980,basis:'/mo, school yr',opt:'$8,820/yr triple · needs aid eligibility',walk:0,furn:1,util:1,st:'Apply by Oct 20 for Spring',src:'SJSU Housing rates',checked:'2026-02-26',url:'https://sjsu.edu/housing/apply-for-housing/housing-rates/academic-year-rates.php',tags:['No credit check','Wi-Fi incl.']},
+ {n:'"Fire Haus" 5BR house',a:'934 Santa Clara St, Santa Clara, CA',c:'SCU',k:'room',lo:1600,basis:'/room if 5 share',opt:'Whole 5BR/2BA $8,000 · parking',walk:6,wd:1,st:'Was for Jul 2026: check',warn:1,stale:1,src:'Apartments.com',checked:'2026-07-14',url:'https://aptsearch.northeastern.edu/housing/property/934-santa-clara-st/qq41jly',tags:[]},
+ {n:'White Dr duplex (2BR)',a:'1257–1259 White Dr, Santa Clara, CA',c:'SCU',k:'share',lo:1398,basis:'/person if 2 share',opt:'2BR/1BA $2,795 total · tenant pays utilities · no pets',walk:46,st:'Was Sep 15: check',warn:1,stale:1,src:'Apartments.com',checked:'2026-09-15',url:'https://aptsearch.northeastern.edu/housing/property/1257-1259-white-drive/9r6cwz6',tags:['W/D hookups','Carport','Yard']},
+ {n:'SCU Residence Hall',a:'On campus · Santa Clara University',c:'SCU',k:'campus',lo:1208,basis:'/mo, school yr',opt:'Double-as-triple $10,872/yr incl. food',walk:0,furn:1,util:1,st:'Official 2026–27 rate',src:'SCU Bursar fee schedule',checked:'2026-04-01',url:'https://www.scu.edu/media/offices/bursar/2026-27-Tuition-&-Student-Fees-Schedule-UG-and-Graduate-Programs--Apr-2026.pdf',tags:['Food included','No credit check']},
+ {n:'Summerwood Apartments',a:'444 Saratoga Ave, Santa Clara, CA',c:'SCU',k:'share',lo:1808,basis:'/person if 2 share',opt:'1BR $3,515+ · 2BR $3,615+',walk:null,pets:1,st:'Listed',src:'RentCafe',checked:'2026-10-13',undated:1,url:'https://www.rentcafe.com/off-campus-for-rent/ca/apartments-near-santa-clara-university/',tags:['Gym']},
+ {n:'Tuscany',a:'3229 El Camino Real, Santa Clara, CA',c:'SCU',k:'share',lo:1986,basis:'/person if 2 share',opt:'1BR $3,446 · 2BR $3,972 · 2 units left',walk:null,pets:1,st:'2 units left',warn:1,src:'RentCafe',checked:'2026-10-13',undated:1,url:'https://www.rentcafe.com/off-campus-for-rent/ca/apartments-near-santa-clara-university/',tags:['Parking']},
+ {n:'808 West Apartments',a:'808 W San Carlos St, San Jose, CA',c:'SCU',k:'share',lo:1944,basis:'/person if 2 share',opt:'Studio $2,993+ · 1BR $3,118+ · 2BR $3,888+',walk:null,wd:1,pets:1,st:'Listed',src:'RentCafe',checked:'2026-10-13',undated:1,url:'https://www.rentcafe.com/off-campus-for-rent/ca/apartments-near-santa-clara-university/',tags:[]}
+]};
+var TYPES={room:'Room',share:'Share a unit',alone:'Live alone',campus:'On campus'};
+var KEY='student-housing-finder.v1',PER=12;
+var D,S={area:'ALL',bud:1600,types:{},needs:{},sort:'price',page:0,sel:null,edit:null};
+
+function $(id){return document.getElementById(id)}
+function m(v){return '$'+Math.round(v).toLocaleString('en-US')}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function safeUrl(u){return /^https?:\/\//i.test(u||'')?u:''}
+function num(v){return v===''||v==null||isNaN(+v)?null:+v}
+function today(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function clone(o){return JSON.parse(JSON.stringify(o))}
+function day(s){var p=/^(\d{4})-(\d\d)-(\d\d)$/.exec(s||'');return p?new Date(+p[1],p[2]-1,+p[3]):null}
+function fmtD(s,yr){var d=day(s);return d?d.toLocaleDateString('en-US',yr===false?{month:'short',day:'numeric'}:{month:'short',day:'numeric',year:'numeric'}):''}
+function toast(t){var e=$('toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(function(){e.style.display='none'},2200)}
+
+/* storage: this browser only */
+function load(){try{var s=JSON.parse(localStorage.getItem(KEY));if(s&&s.listings)return s}catch(e){}return clone(EXAMPLE)}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}}
+function norm(x){
+  var o={n:String(x.n||x.name||'').trim(),a:x.a||x.address||'',c:String(x.c||x.campus||x.area||'').trim()||'My area',
+    k:TYPES[x.k||x.type]?(x.k||x.type):'room',lo:num(x.lo!=null?x.lo:x.price),hi:num(x.hi),basis:x.basis||'',opt:x.opt||x.details||'',
+    walk:num(x.walk),st:x.st||x.status||'',src:x.src||x.source||'',checked:x.checked||'',url:x.url||x.link||'',
+    tags:Array.isArray(x.tags)?x.tags:String(x.tags||'').split(/[,;]/).map(function(t){return t.trim()}).filter(Boolean)};
+  ['furn','wd','pets','util','undated','stale','warn'].forEach(function(k){var v=x[k];o[k]=v===true||v===1||/^(1|y|yes|true|x)$/i.test(String(v||''))?1:0});
+  return o;
+}
+
+/* how fresh is a price? ok = dated & recent, mid = no date on page, off = old */
+function fr(x){
+  if(x.k==='campus')return x.checked?'ok':'mid';
+  if(x.stale)return 'off';
+  var d=day(x.checked);if(!d)return 'mid';
+  if((Date.now()-d)/864e5>60)return 'off';
+  return x.undated?'mid':'ok';
+}
+var FRL={ok:'Checked recently',mid:'Page has no date',off:'Older, may be gone'};
+
+function areas(){var a=[];D.listings.forEach(function(x){if(a.indexOf(x.c)<0)a.push(x.c)});return a}
+function list(){
+  var r=D.listings.filter(function(x){
+    if(S.area!=='ALL'&&x.c!==S.area)return false;
+    var t=S.types,anyT=t.room||t.share||t.alone||t.campus;if(anyT&&!t[x.k])return false;
+    var n=S.needs;
+    if(n.furn&&!x.furn)return false; if(n.wd&&!x.wd)return false; if(n.pets&&!x.pets)return false;
+    if(n.util&&!x.util)return false; if(n.walk&&!(x.walk!=null&&x.walk<=10))return false;
+    if(n.priced&&x.lo==null)return false;
+    return true;
+  });
+  r.sort(function(a,b){
+    if(S.sort==='walk'){var aw=a.walk==null?999:a.walk,bw=b.walk==null?999:b.walk;if(aw!==bw)return aw-bw;}
+    if(S.sort==='new'){var ad=a.checked||'',bd=b.checked||'';if(ad!==bd)return ad<bd?1:-1;}
+    return (a.lo==null?1e9:a.lo)-(b.lo==null?1e9:b.lo);
+  });
+  return r;
+}
+function walkTxt(x){return x.walk==null?'':x.walk===0?'On campus':x.walk+' min walk'}
+function short(s){return (s||'').length>22?s.slice(0,21)+'…':s}
+
+function render(){
+  var all=D.listings,r=list(),fits=r.filter(function(x){return x.lo!=null&&x.lo<=S.bud}).length;
+  if(S.sel&&all.indexOf(S.sel)<0)S.sel=null;
+  var newest=all.map(function(x){return x.checked||''}).sort().pop();
+  $('upd').innerHTML=all.length?'<b>● '+all.length+' places'+(newest?' · newest price check '+esc(fmtD(newest)):'')+'</b> · works for any US campus: add the places you find, filter by your needs, tap one to see your real cost'
+    :'Add the places you\'re looking at, or import a spreadsheet. Everything stays in this browser.';
+  areaUI();
+  $('budv').textContent=m(S.bud); $('fitn').textContent=fits+' fit your budget';
+  $('title').textContent=S.area==='ALL'?(areas().length>1?'All places':'Places near '+(areas()[0]||'campus')):'Places near '+S.area;
+  $('count').textContent=r.length+' places · blue price = fits your budget';
+  var pages=Math.max(1,Math.ceil(r.length/PER)); if(S.page>=pages)S.page=pages-1;
+  $('pg').textContent=(S.page+1)+'/'+pages; $('prev').disabled=S.page===0; $('next').disabled=S.page>=pages-1;
+  var g=$('grid'); g.innerHTML='';
+  if(!all.length){g.innerHTML='<div class="empty"><div><b>No places yet</b>Add each place you\'re considering, near any US campus.<br>Or fill the CSV template in a spreadsheet and import it.<br><button class="btn pri" onclick="openForm()">+ Add a place</button><button class="btn" onclick="$(\'file\').click()">Import</button><button class="btn" onclick="loadExample()">See an example</button></div></div>';}
+  else if(!r.length){g.innerHTML='<div class="empty"><div><b>No places match all of these needs.</b>Try removing a filter or raising your budget.</div></div>';}
+  r.slice(S.page*PER,S.page*PER+PER).forEach(function(x){
+    var b=document.createElement('button'); b.className='l'+(S.sel===x?' sel':'');
+    var price=x.lo==null?'<b class="call">Call for rent</b>':
+      '<b class="'+(x.lo<=S.bud?'fits':'')+'">'+m(x.lo)+(x.hi?'–'+m(x.hi).slice(1):'')+'</b><span>'+esc(x.basis)+'</span>';
+    var tags=[walkTxt(x),TYPES[x.k]];
+    if(x.furn)tags.push('Furnished'); if(x.wd)tags.push('In-unit W/D'); if(x.pets)tags.push('Pets'); if(x.util)tags.push('Utilities incl.');
+    tags=tags.concat(x.tags||[]).filter(Boolean).slice(0,4);
+    var f=fr(x);
+    b.innerHTML='<div class="top"><div style="min-width:0"><div class="nm">'+esc(x.n)+'</div><div class="ad">'+esc(x.a)+'</div></div><span class="camp">'+esc(x.c)+'</span></div>'+
+      '<div class="pr">'+price+'</div><div class="opt">'+esc(x.opt)+'</div>'+
+      '<div class="tags">'+tags.map(function(t){return '<span class="tag">'+esc(t)+'</span>'}).join('')+'</div>'+
+      '<div class="foot">'+(x.st?'<span class="st '+(x.warn?'warn':'ok')+'">'+esc(x.st)+'</span>':'<span></span>')+
+      '<span class="src" title="'+FRL[f]+'"><i class="dot '+(f==='ok'?'':f)+'"></i><em>'+esc(x.src)+'</em>'+(x.checked?' · '+esc(fmtD(x.checked,false)):'')+'</span></div>';
+    b.onclick=function(){S.sel=S.sel===x?null:x;render();};
+    g.appendChild(b);
+  });
+  freshUI(r); srcUI(); detail(r);
+}
+function areaUI(){
+  var a=areas(),box=$('areaBox');if(S.area!=='ALL'&&a.indexOf(S.area)<0)S.area='ALL';
+  $('areaList').innerHTML=a.map(function(v){return '<option value="'+esc(v)+'">'}).join('');
+  if(a.length<=2){
+    box.innerHTML='<div class="seg">'+(a.length===2?'':'')+a.map(function(v){return '<button data-v="'+esc(v)+'" class="'+(S.area===v?'on':'')+'">'+esc(v)+'</button>'}).join('')+
+      '<button data-v="ALL" class="'+(S.area==='ALL'?'on':'')+'">'+(a.length===2?'Both':'All')+'</button></div>';
+    box.firstChild.onclick=function(e){var v=e.target.dataset.v;if(!v)return;S.area=v;S.page=0;S.sel=null;render();};
+  }else{
+    box.innerHTML='<select class="area"><option value="ALL">All areas ('+D.listings.length+')</option>'+a.map(function(v){return '<option '+(S.area===v?'selected ':'')+'value="'+esc(v)+'">'+esc(v)+'</option>'}).join('')+'</select>';
+    box.firstChild.onchange=function(){S.area=this.value;S.page=0;S.sel=null;render();};
+  }
+}
+function freshUI(r){
+  var c={ok:0,mid:0,off:0};r.forEach(function(x){c[fr(x)]++});
+  $('freshBox').innerHTML='<div class="lbl" style="margin-bottom:4px">How current are these prices?</div>'+
+    '<div class="r"><i class="dot"></i>Checked in last 60 days<b>'+c.ok+'</b></div>'+
+    '<div class="r"><i class="dot mid"></i>Listing page has no date<b>'+c.mid+'</b></div>'+
+    '<div class="r"><i class="dot off"></i>Older, may be gone<b>'+c.off+'</b></div>'+
+    '<div class="fine">Re-check grey ones, then update the date.</div>';
+}
+function srcUI(){
+  var g={};D.listings.forEach(function(x){if(!x.src)return;var o=g[x.src]||(g[x.src]={d:'',f:'off'});if((x.checked||'')>=o.d){o.d=x.checked||'';o.f=fr(x)}});
+  var h='<span class="lbl">Where this comes from</span>';
+  Object.keys(g).slice(0,7).forEach(function(k){var o=g[k];h+='<span class="pill"><i class="dot '+(o.f==='ok'?'':o.f)+'"></i>'+esc(k)+(o.d?', '+esc(fmtD(o.d,false)):'')+'</span>';});
+  if(!Object.keys(g).length)h+='<span class="pill">Add a source to each place so you can re-check it later</span>';
+  h+='<span class="note">Saved only in this browser · Export to back up or share · Verify before paying</span>';
+  $('srcStrip').innerHTML=h;
+}
+function scamHTML(){
+  return '<div class="scam"><div class="lbl">Before you pay anything</div><ul>'+
+    '<li>Never pay by wire, crypto, gift card or Zelle before seeing the unit</li>'+
+    '<li>Owner "overseas" or can\'t show it? Walk away</li>'+
+    '<li>Same photos on another listing = likely copied</li>'+
+    '<li>Deposit above your state\'s legal limit is a red flag</li></ul></div>';
+}
+function costRows(rent,basis,utilIncl){
+  var st=D.settings,u=utilIncl?0:num(st.util),f=num(st.food),tot=rent+(u||0)+(f||0);
+  return '<div class="row"><span>Rent '+esc(basis)+'</span><b>'+m(rent)+'</b></div>'+
+    '<div class="row"><span>Utilities + internet</span><b>'+(utilIncl?'Included':u!=null?'~'+m(u)+' est.':'Add yours ←')+'</b></div>'+
+    '<div class="row"><span>Food</span><b>'+(f!=null?m(f):'Add yours ←')+'</b></div>'+
+    '<div class="row tot"><span>Per month</span><b>~'+m(tot)+'</b></div>';
+}
+function moveIn(rent){var st=D.settings,dep=num(st.dep)||0,fee=num(st.fee)||0;return rent*dep+rent+fee}
+function detail(r){
+  var d=$('detail'),x=S.sel,st=D.settings;
+  if(!x){
+    var p=r.filter(function(y){return y.lo!=null&&y.k!=='campus'}).map(function(y){return y.lo}).sort(function(a,b){return a-b});
+    var med=p.length?p[Math.floor((p.length-1)/2)]:null;
+    var h='<div class="dh"><div class="nm">Pick a place to see your real cost</div><div class="ad">Rent is only part of it. Tap any card to add utilities, food and move-in cash.</div></div>';
+    if(med!=null)h+='<div class="cost"><div class="lbl">Median place in this view ('+p.length+')</div>'+costRows(med,'',false)+
+      '<div class="row up"><span>Move-in cash (deposit + 1st month + fee)</span><b>~'+m(moveIn(med))+'</b></div></div>';
+    h+='<div class="ask"><div class="lbl">What you\'ll usually need to apply</div><ul>'+
+      '<li>Income 2.5–3x rent, or bank statements</li>'+
+      '<li>Credit around 650–700 is common; there\'s no legal minimum</li>'+
+      '<li>No US credit? A US co-signer or guarantor company</li>'+
+      '<li>Passport or license; I-20 for international students</li></ul></div>'+scamHTML();
+    d.innerHTML=h;return;
+  }
+  var cost,campus=x.k==='campus';
+  if(x.lo==null){
+    cost='<div class="cost"><div class="lbl">Your cost</div><div class="row"><span>Rent is not published</span><b>Call</b></div><div class="fine">Ask for the per-bed price, all monthly fees and which utilities are included before you apply.</div></div>';
+  }else{
+    cost='<div class="cost"><div class="lbl">Your real monthly cost (lowest price)</div>'+costRows(x.lo,x.basis,x.util)+
+      (campus?'<div class="row up"><span>Up front</span><b>See school</b></div>':
+       '<div class="row up"><span>Move-in cash ('+(num(st.dep)||0)+' mo deposit + 1st month + fee)</span><b>~'+m(moveIn(x.lo))+'</b></div>')+
+      '<div class="fine">'+(campus?'Campus rate shown per month of the school year; check the school\'s housing deposit.':'Utilities and food are your numbers from the left panel. Ask the landlord for theirs.')+'</div></div>';
+  }
+  var ask=['Is the price per bed, per person, or for the whole unit?','Which utilities and fees are in the rent?','Lease length, and can I sublet over summer?'];
+  if(x.warn||fr(x)==='off')ask.unshift('Is it really still available at this price?');
+  var url=safeUrl(x.url);
+  d.innerHTML='<div class="dh"><div class="nm">'+esc(x.n)+'</div><div class="ad">'+esc(x.a)+(x.src?' · '+esc(x.src):'')+(x.checked?', '+esc(fmtD(x.checked)):'')+'</div>'+
+    '<div class="links">'+(url?'<a href="'+esc(url)+'" target="_blank" rel="noopener">Open the listing ↗</a>':'')+'<button class="lk" id="dEdit">Edit / update price</button><button class="lk del" id="dDel">Remove</button></div></div>'+cost+
+    '<div class="ask"><div class="lbl">Ask before you apply</div><ul>'+ask.slice(0,4).map(function(q){return '<li>'+q+'</li>'}).join('')+'</ul></div>'+scamHTML();
+  $('dEdit').onclick=function(){openForm(x)};
+  $('dDel').onclick=function(){if(confirm('Remove "'+x.n+'" from this browser?')){D.listings.splice(D.listings.indexOf(x),1);S.sel=null;save();render();}};
+}
+
+/* settings inputs */
+function settingsUI(){var st=D.settings;$('sUtil').value=st.util==null?'':st.util;$('sFood').value=st.food==null?'':st.food;$('sDep').value=st.dep==null?'':st.dep;$('sFee').value=st.fee==null?'':st.fee;}
+[['sUtil','util'],['sFood','food'],['sDep','dep'],['sFee','fee']].forEach(function(p){$(p[0]).oninput=function(){D.settings[p[1]]=num(this.value);save();render();};});
+
+/* add / edit */
+function openForm(x){
+  var f=$('form');f.reset();S.edit=x||null;
+  $('fTitle').firstChild.nodeValue=x?'Edit place':'Add a place';
+  var o=x||{c:S.area!=='ALL'?S.area:(areas()[0]||''),checked:today()};
+  ['n','a','c','k','lo','hi','basis','opt','walk','st','src','checked','url'].forEach(function(k){if(o[k]!=null)f.elements[k].value=o[k]});
+  f.elements.tags.value=(o.tags||[]).join(', ');
+  ['furn','wd','pets','util','undated','stale','warn'].forEach(function(k){f.elements[k].checked=!!o[k]});
+  $('modal').classList.add('on');f.elements.n.focus();
+}
+function closeForm(){$('modal').classList.remove('on')}
+$('form').onsubmit=function(e){
+  e.preventDefault();var f=this,o={};
+  ['n','a','c','k','lo','hi','basis','opt','walk','st','src','checked','url','tags'].forEach(function(k){o[k]=f.elements[k].value});
+  ['furn','wd','pets','util','undated','stale','warn'].forEach(function(k){o[k]=f.elements[k].checked?1:0});
+  var x=norm(o);
+  if(S.edit){D.listings[D.listings.indexOf(S.edit)]=x}else{D.listings.push(x)}
+  S.sel=x;save();closeForm();render();toast(S.edit?'Place updated':'Place added');
+};
+$('fCancel').onclick=closeForm;
+$('modal').onclick=function(e){if(e.target===this)closeForm()};
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeForm()});
+$('addBtn').onclick=function(){openForm()};
+
+/* import / export */
+var COLS=['name','campus','address','type','price','hi','basis','details','walk','furn','wd','pets','util','status','source','checked','undated','stale','warn','url','tags'];
+var MAP={name:'n',campus:'c',address:'a',type:'k',price:'lo',details:'opt',status:'st',source:'src'};
+function csvParse(t){var rows=[],row=[],cell='',q=false;for(var i=0;i<t.length;i++){var ch=t[i];
+  if(q){if(ch==='"'){if(t[i+1]==='"'){cell+='"';i++}else q=false}else cell+=ch}
+  else if(ch==='"')q=true;else if(ch===','){row.push(cell);cell=''}else if(ch==='\n'||ch==='\r'){if(ch==='\r'&&t[i+1]==='\n')i++;row.push(cell);rows.push(row);row=[];cell=''}else cell+=ch}
+  if(cell||row.length){row.push(cell);rows.push(row)}
+  var h=(rows.shift()||[]).map(function(s){return s.trim().toLowerCase()});
+  return rows.filter(function(r){return r.join('').trim()}).map(function(r){var o={};h.forEach(function(k,i){o[k]=r[i]});return o});}
+function csvCell(v){v=v==null?'':String(v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
+function toCsv(ls){return COLS.join(',')+'\n'+ls.map(function(x){return COLS.map(function(c){var v=x[MAP[c]||c];return csvCell(Array.isArray(v)?v.join('; '):v)}).join(',')}).join('\n')}
+function download(name,text,type){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:type}));a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500)}
+$('impBtn').onclick=function(){$('file').click()};
+$('file').onchange=function(){
+  var file=this.files[0];if(!file)return;var rd=new FileReader();
+  rd.onload=function(){
+    try{
+      var txt=String(rd.result),rows,set=null;
+      if(/\.json$/i.test(file.name)||/^\s*[\[{]/.test(txt)){var j=JSON.parse(txt);rows=Array.isArray(j)?j:j.listings;set=j.settings||null}
+      else rows=csvParse(txt);
+      var add=(rows||[]).map(norm).filter(function(x){return x.n});
+      if(!add.length)throw 0;
+      var replace=D.listings.length&&confirm('Replace the '+D.listings.length+' places you have now?\nOK = replace · Cancel = add to them');
+      D.listings=replace?add:D.listings.concat(add);if(set)D.settings=set;
+      S.page=0;S.sel=null;save();settingsUI();render();toast('Imported '+add.length+' places');
+    }catch(e){toast('Could not read that file. Use the CSV template.')}
+  };
+  rd.readAsText(file);this.value='';
+};
+$('expBtn').onclick=function(){
+  if(!D.listings.length){toast('Nothing to export yet');return}
+  download('student-housing.json',JSON.stringify({settings:D.settings,listings:D.listings},null,1),'application/json');
+  download('student-housing.csv',toCsv(D.listings),'text/csv');
+  toast('Saved JSON + CSV');
+};
+$('exCsv').onclick=function(){$('menu').open=false;download('student-housing-template.csv',toCsv([norm({n:'Example: Maple Court',c:'My campus',a:'123 Main St, City, ST',k:'share',lo:900,basis:'/person if 2 share',opt:'2BR $1,800 total',walk:12,src:'Where you found it',checked:today(),furn:1,tags:'Parking'})]),'text/csv')};
+function loadExample(){D=clone(EXAMPLE);S.area='ALL';S.page=0;S.sel=null;save();settingsUI();render();toast('Example loaded: San Jose, CA')}
+$('loadEx').onclick=function(){$('menu').open=false;if(!D.listings.length||confirm('Replace your places with the San Jose example?'))loadExample()};
+$('clearAll').onclick=function(){$('menu').open=false;if(confirm('Remove all '+D.listings.length+' places from this browser? Export first if you want a copy.')){D.listings=[];S.sel=null;save();render();}};
+document.addEventListener('click',function(e){var mm=$('menu');if(mm.open&&!mm.contains(e.target))mm.open=false});
+
+/* filters */
+$('sort').onclick=function(e){var v=e.target.dataset.v;if(!v)return;S.sort=v;S.page=0;[].forEach.call(this.children,function(b){b.classList.toggle('on',b.dataset.v===v)});render();};
+$('needs').onclick=function(e){var k=e.target.dataset.k;if(!k)return;S.needs[k]=!S.needs[k];e.target.classList.toggle('on');S.page=0;render();};
+$('types').onclick=function(e){var k=e.target.dataset.k;if(!k)return;S.types[k]=!S.types[k];e.target.classList.toggle('on');S.page=0;render();};
+$('bud').oninput=function(){S.bud=+this.value;render();};
+$('prev').onclick=function(){S.page--;render();};$('next').onclick=function(){S.page++;render();};
+
+D=load();if(!D.settings)D.settings={};settingsUI();render();
+</script>
+</body>
+</html>
